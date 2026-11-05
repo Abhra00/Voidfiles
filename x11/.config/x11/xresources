@@ -1,0 +1,116 @@
+! font
+St.font:            Iosevka:style=Medium:size=10:antialias=true:autohint=true
+St.font_bold:       Iosevka:style=Bold:antialias=true:autohint=true
+St.font_italic:     Iosevka:style=Medium Italic:antialias=true:autohint=true
+St.font_bolditalic: Iosevka:style=Bold Italic:antialias=true:autohint=true
+
+! fallback
+St.font_fallback1:  JoyPixels:size=10.0:antialias=true:autohint=true
+St.font_fallback2:  Symbola:size=13.5:antialias=true:autohint=true
+
+St.font_features:   calt=1,dlig=1
+
+St.cols:            80
+St.rows:            24
+St.borderpx:        2
+St.borderperc:      0
+St.anysize:         1
+
+St.alpha:           1.00
+St.alphaUnfocused:  1.00
+
+! colors (gruber darker)
+St.foreground:      #e4e4ef
+St.background:      #181818
+St.bgUnfocused:     #181818
+St.cursorColor:     #e4e4ef
+St.reverseCursor:   #181818
+St.visualbellcolor: #e4e4ef
+St.color0:          #282828
+St.color1:          #f43841
+St.color2:          #73c936
+St.color3:          #ffdd33
+St.color4:          #96a6c8
+St.color5:          #9e95c7
+St.color6:          #95a99f
+St.color7:          #e4e4ef
+St.color8:          #52494e
+St.color9:          #f43841
+St.color10:         #73c936
+St.color11:         #ffdd33
+St.color12:         #96a6c8
+St.color13:         #9e95c7
+St.color14:         #95a99f
+St.color15:         #ffffff
+
+! search results
+St.highlightfg:     0
+St.highlightbg:     11
+
+! flash label
+St.flashlabelfg: 0
+St.flashlabelbg: 11
+St.flashtextfg:  8
+St.flashtextbg:  0
+
+! hyperlink hint
+St.hyperlinkhintfg: 0
+St.hyperlinkhintbg: 258
+
+! keyboard selection bars
+St.kbselectfg: 0
+St.kbselectbg: 258
+
+St.scrollbackindicatorfg: 258
+
+St.dynamic_cursor_color: 0
+
+St.cursorstyle:     2
+St.cursorblinking:  1
+St.cursorblinktimeout: 800
+
+St.cwscale:         1.0
+St.chscale:         1.0
+St.vertcenter:      0
+
+St.boxdraw:         1
+St.boxdraw_bold:    1
+St.boxdraw_braille: 1
+St.boxdraw_extra:   1
+St.boxdraw_branch:  1
+St.boxdraw_branch_thickness: 0
+
+St.hidecursor:      0
+St.ligatures:       0
+
+St.url_opener: xdg-open
+St.url_protocols: https:\/\/,http:\/\/,file:\/,ftp:\/\/,mailto:,vscode:\/\/
+
+St.undercurl_style: 1
+St.undercurl_thickness_threshold:   28
+St.undercurl_extra_thickness:       0
+St.undercurl_yoffset:               0
+St.undercurl_height_scale:          1.0
+
+St.termname:                st-256color
+St.shell:                   /bin/sh
+St.minlatency:              2.0
+St.maxlatency:              33.0
+St.su_timeout:              200
+St.blinktimeout:            800
+St.doubleclicktimeout:      300
+St.tripleclicktimeout:      600
+St.bellvolume:              0
+St.visualbellstyle:         0
+St.visualbellduration:      100
+St.visualbellanimfps:       60
+St.tabspaces:               8
+St.cursorthickness:         2
+St.bold_is_not_bright:      1
+St.hyperlinkstyle:          1
+St.showhyperlinkhint:       1
+St.disablehyperlinks:       0
+St.autoscrolltimeout:       200
+St.autoscrollacceleration:  1.0
+St.scrollbacklines:         2000
+St.scrollbackindicator:     1

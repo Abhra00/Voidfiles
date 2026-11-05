@@ -1,0 +1,63 @@
+# ~/.config/i3status-rust/config.toml
+[theme]
+theme = "gruberdarker"
+
+[icons]
+icons = "none"
+
+[[block]]
+block = "temperature"
+interval = 5
+format = "Tea: $average"
+good = 75
+idle = 75
+info = 75
+warning = 85
+
+[[block]]
+block = "disk_space"
+path = "/"
+info_type = "available"
+interval = 30
+warning = 20.0
+alert = 10.0
+format = "Penger Folder: $available"
+
+[[block]]
+block = "custom"
+interval = 5
+json = true
+command = '''
+ip=$(ip -4 route get 1.1.1.1 2>/dev/null | grep -oP 'src \K\S+')
+if [ -n "$ip" ]; then
+  echo "{\"text\":\"Leaked IP: $ip\",\"state\":\"Critical\"}"
+else
+  echo '{"text":"net: down","state":"Idle"}'
+fi
+'''
+
+[[block]]
+block = "net"
+interval = 1
+format = "Down: $speed_down.eng(w:5,prefix:M,u:b) Up: $speed_up.eng(w:5,prefix:M,u:b)"
+missing_format = ""
+
+[[block]]
+block = "battery"
+interval = 10
+format = "Fairy Dust: $percentage $status"
+full_format = "Fairy Dust: $percentage"
+good = 100
+info = 40
+warning = 25
+critical = 15
+
+[[block]]
+block = "load"
+interval = 5
+format = "Hot Loads: $1m.eng(w:4)"
+
+[[block]]
+block = "time"
+interval = 1
+format = "$timestamp.datetime(f:'%Y-%m-%d %H:%M:%S')"

@@ -1,0 +1,9 @@
+# Use Xresources colors/settings on startup
+xrdb ${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources & xrdbpid=$!
+
+# Ensure that xrdb has finished running before moving on to start the WM/DE
+[ -n "$xrdbpid" ] && wait "$xrdbpid"
+
+# Activate dbus variables
+dbus-update-activation-environment --all
+dbus-launch ssh-agent i3

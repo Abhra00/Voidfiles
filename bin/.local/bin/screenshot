@@ -1,0 +1,12 @@
+#!/bin/sh
+
+choice=$(printf 'Area\nFull screen\nActive window\n' | dmenu -p 'Screenshot:')
+[ -z "$choice" ] && exit 0
+
+sleep 0.2
+
+case "$choice" in
+    "Area")          maim -s -u ;;
+    "Full screen")   maim -u ;;
+    "Active window") maim -u -i "$(xdotool getactivewindow)" ;;
+esac | xclip -selection clipboard -t image/png

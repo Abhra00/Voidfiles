@@ -1,0 +1,17 @@
+#!/bin/sh
+
+locker=${LOCKER:-i3lock}
+
+confirm() {
+    [ "$(printf 'no\nyes\n' | dmenu -i -p "$1?")" = yes ]
+}
+
+choice=$(printf 'lock\nlogout\nsuspend\nreboot\nshutdown\n' | dmenu -i -p power)
+
+case $choice in
+    lock) $locker ;;
+    logout) confirm logout && i3-msg exit ;;
+    suspend) loginctl suspend ;;
+    reboot) confirm reboot && loginctl reboot ;;
+    shutdown) confirm shutdown && loginctl poweroff ;;
+esac

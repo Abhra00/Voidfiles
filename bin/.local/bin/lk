@@ -1,0 +1,29 @@
+#!/bin/sh
+# lk: layout-aware keys for i3 (needs jq)
+#   lk next | lk prev   cycle entries of the nearest tabbed/stacked container (wraps)
+#   lk tab N            focus the Nth tab/stack entry of that container
+
+list=$(i3-msg -t get_tree | jq -r '
+  def hf: any(recurse(.nodes[]?); .focused);
+  [recurse(.nodes[]?) | select((.layout == "tabbed" or .layout == "stacked") and hf)]
+  | last // empty
+  | .nodes[]
+  | "\(.id) \(if hf then "*" else "" end)"')
+
+case "$1" in
+  tab)
+    id=$(printf '%s\n' "$list" | sed -n "${2}p" | cut -d' ' -f1)
+    [ -n "$id" ] && i3-msg "[con_id=$id] focus" >/dev/null
+    ;;
+  next|prev)
+    if [ -z "$list" ]; then
+      # no tabbed/stacked ancestor: behave like plain focus movement
+      if [ "$1" = next ]; then i3-msg focus right >/dev/null; else i3-msg focus left >/dev/null; fi
+      exit 0
+    fi
+    id=$(printf '%s\n' "$list" | awk -v d="$1" '
+      { ids[NR] = $1; if ($2 == "*") cur = NR }
+      END { n = NR; i = (d == "next") ? cur % n + 1 : (cur + n - 2) % n + 1; print ids[i] }')
+    [ -n "$id" ] && i3-msg "[con_id=$id] focus" >/dev/null
+    ;;
+esac

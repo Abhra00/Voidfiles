@@ -4,6 +4,10 @@ font pango:Iosevka 10
 floating_modifier $mod
 tiling_drag modifier titlebar
 
+# behaviour
+force_focus_wrapping yes
+workspace_auto_back_and_forth yes
+
 # palette
 set $bg #181818
 set $bg1 #282828
@@ -22,7 +26,6 @@ workspace_layout tabbed
 default_border normal 0
 default_floating_border normal 0
 title_align left
-for_window [class=".*"] border normal 0
 
 client.focused          $azurite $azurite $fg1    $azurite $azurite
 client.focused_inactive $bg2     $bg2     $fg     $bg2     $bg2
@@ -41,12 +44,12 @@ exec --no-startup-id /usr/libexec/polkit-gnome-authentication-agent-1
 
 # apps
 bindsym $mod+Return exec st
-bindsym $mod+b exec firefox
+bindsym $mod+w exec firefox
 bindsym $mod+d exec --no-startup-id dmenu_run
-bindsym $mod+Shift+q kill
+bindsym $mod+q kill
 
 # utilities
-bindsym $mod+shift+s exec --no-startup-id ~/.local/bin/screenshot
+bindsym $mod+Shift+s exec --no-startup-id ~/.local/bin/screenshot
 
 # media
 bindsym XF86AudioRaiseVolume exec --no-startup-id osd volume up
@@ -72,36 +75,44 @@ bindsym $mod+comma exec --no-startup-id playerctl previous
 bindsym $mod+period exec --no-startup-id playerctl next
 
 # focus
+bindsym $mod+f focus right
+bindsym $mod+b focus left
 bindsym $mod+n focus down
 bindsym $mod+p focus up
-bindsym $mod+f focus right
-bindsym $mod+Ctrl+b focus left
 bindsym $mod+a focus parent
+bindsym $mod+z focus child
 
-# tabs
-bindsym $mod+Tab focus right
-bindsym $mod+Shift+Tab focus left
-bindsym $mod+o focus right
-bindsym $mod+Shift+o focus left
-bindsym $mod+Ctrl+f move right
-bindsym $mod+Ctrl+Shift+b move left
-bindsym Mod1+1 [con_id="__focused__"] focus
-bindsym $mod+t layout tabbed
-bindsym $mod+Shift+t layout toggle tabbed split
+# focus cycle
+bindsym $mod+Tab exec --no-startup-id ~/.local/bin/lk next
+bindsym $mod+Shift+Tab exec --no-startup-id ~/.local/bin/lk prev
+bindsym $mod+o exec --no-startup-id ~/.local/bin/lk next
+bindsym $mod+Shift+o exec --no-startup-id ~/.local/bin/lk prev
+
+# jump straight to tab N
+bindsym $mod+Ctrl+1 exec --no-startup-id ~/.local/bin/lk tab 1
+bindsym $mod+Ctrl+2 exec --no-startup-id ~/.local/bin/lk tab 2
+bindsym $mod+Ctrl+3 exec --no-startup-id ~/.local/bin/lk tab 3
+bindsym $mod+Ctrl+4 exec --no-startup-id ~/.local/bin/lk tab 4
+bindsym $mod+Ctrl+5 exec --no-startup-id ~/.local/bin/lk tab 5
+bindsym $mod+Ctrl+6 exec --no-startup-id ~/.local/bin/lk tab 6
+bindsym $mod+Ctrl+7 exec --no-startup-id ~/.local/bin/lk tab 7
+bindsym $mod+Ctrl+8 exec --no-startup-id ~/.local/bin/lk tab 8
+bindsym $mod+Ctrl+9 exec --no-startup-id ~/.local/bin/lk tab 9
 
 # move windows
-bindsym $mod+Shift+n move down
-bindsym $mod+Shift+p move up
 bindsym $mod+Shift+f move right
 bindsym $mod+Shift+b move left
+bindsym $mod+Shift+n move down
+bindsym $mod+Shift+p move up
 
 # layout
+bindsym $mod+t layout tabbed
+bindsym $mod+s layout stacking
+bindsym $mod+e layout toggle split
+bindsym $mod+Shift+t layout toggle tabbed split
 bindsym $mod+h split h
 bindsym $mod+v split v
 bindsym $mod+m fullscreen toggle
-bindsym $mod+s layout stacking
-bindsym $mod+w layout tabbed
-bindsym $mod+e layout toggle split
 bindsym $mod+Shift+space floating toggle
 bindsym $mod+space focus mode_toggle
 

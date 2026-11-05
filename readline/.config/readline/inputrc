@@ -1,0 +1,25 @@
+set editing-mode emacs
+set bell-style none
+set completion-ignore-case on
+set completion-map-case on
+set show-all-if-ambiguous on
+set show-all-if-unmodified on
+set colored-stats on
+set colored-completion-prefix on
+set visible-stats on
+set mark-symlinked-directories on
+set skip-completed-text on
+set match-hidden-files off
+set page-completions off
+set enable-bracketed-paste on
+
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+"\ep": history-search-backward
+"\en": history-search-forward
+
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
+
+"\C-o": menu-complete
+"\e[Z": menu-complete-backward

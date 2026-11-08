@@ -1,0 +1,78 @@
+#!/bin/sh
+# shellcheck disable=SC2155
+
+# Runs on login (~/.profile is symlinked to this file).
+# Environment variables are set here.
+
+# Default programs
+export EDITOR="emacsclient -c -a ''"
+export VISUAL="$EDITOR"
+export TERMINAL="st"
+export BROWSER="firefox"
+
+# XDG base directories
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_STATE_HOME="$HOME/.local/state"
+
+# ~/ clean-up
+export ANDROID_USER_HOME="$XDG_DATA_HOME/android"
+export CUDA_CACHE_PATH="$XDG_CACHE_HOME/nv"
+export XAUTHORITY="${XDG_RUNTIME_DIR:-$XDG_CACHE_HOME}/Xauthority"
+export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
+export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
+export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
+export PYTHON_HISTORY="$XDG_STATE_HOME/python_history"
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
+export CARGO_HOME="$XDG_DATA_HOME/cargo"
+export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
+export GOPATH="$XDG_DATA_HOME/go"
+export GOMODCACHE="$XDG_CACHE_HOME/go/mod"
+export HISTFILE="$XDG_STATE_HOME/bash_history"
+export SQLITE_HISTORY="$XDG_STATE_HOME/sqlite_history"
+export LESSHISTFILE="$XDG_STATE_HOME/lesshst"
+
+# PATH: local scripts, cargo, go, npm globals (no duplicates on re-source)
+pathadd() {
+  case ":$PATH:" in
+    *":$1:"*) ;;
+    *) PATH="$1:$PATH" ;;
+  esac
+}
+pathadd "$XDG_DATA_HOME/npm/bin"
+pathadd "$GOPATH/bin"
+pathadd "$CARGO_HOME/bin"
+pathadd "$HOME/.local/bin"
+export PATH
+
+# less
+export LESS="R"
+export LESS_TERMCAP_mb="$(printf '%b' '\033[1;31m')"
+export LESS_TERMCAP_md="$(printf '%b' '\033[1;36m')"
+export LESS_TERMCAP_me="$(printf '%b' '\033[0m')"
+export LESS_TERMCAP_so="$(printf '%b' '\033[01;44;33m')"
+export LESS_TERMCAP_se="$(printf '%b' '\033[0m')"
+export LESS_TERMCAP_us="$(printf '%b' '\033[1;32m')"
+export LESS_TERMCAP_ue="$(printf '%b' '\033[0m')"
+export LESSOPEN="| /usr/bin/highlight -O ansi %s 2>/dev/null"
+
+# Fzf settings
+export FZF_DEFAULT_OPTS="
+  --height=60%
+  --layout=reverse
+  --border=sharp
+  --preview-window=right:50%:wrap:border-sharp
+  --info=inline-right
+  --prompt='> '
+  --pointer='>'
+  --marker='+'
+  --bind=ctrl-/:toggle-preview,ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up
+"
+
+# Toolkit / app settings
+export QT_QPA_PLATFORMTHEME="gtk3" # Qt uses the GTK theme
+export MOZ_USE_XINPUT2=1           # Firefox smooth scrolling/touchpads
+
+# Start X on tty1 if it isn't already running
+[ "$(tty)" = "/dev/tty1" ] && ! pidof -s Xorg >/dev/null 2>&1 && exec startx "$XINITRC"

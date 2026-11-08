@@ -1,0 +1,28 @@
+# ~/voidfiles/git/.config/git/config
+[user]
+    name = Abhra00
+    email = 114018452+Abhra00@users.noreply.github.com
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = true
+
+[push]
+    autoSetupRemote = true
+
+[rebase]
+    autoStash = true
+
+[fetch]
+    prune = true
+
+[merge]
+    conflictStyle = zdiff3
+
+[rerere]
+    enabled = true
+
+[diff]
+    algorithm = histogram

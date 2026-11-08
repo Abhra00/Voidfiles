@@ -1,0 +1,71 @@
+#!/bin/sh
+
+img=$HOME/.local/share/Lockpaper.png
+cache=$HOME/.cache/lockscreen
+
+# box: left margin, width, height, bottom margin, fill
+bx=15 bw=340 bh=100 bb=40
+fill='#00000066'
+
+# wallpaper with the box drawn in, rebuilt only when an input changes
+panel() {
+    res=$(xrandr --current | sed -n 's/.*current \([0-9]*\) x \([0-9]*\),.*/\1x\2/p')
+    [ -n "$res" ] || { echo "$img"; return; }
+
+    key=$(printf '%s' "$res $bx $bw $bh $bb $fill $(cksum < "$img")" | cksum | cut -d' ' -f1)
+    out=$cache/lock-$key.png
+    [ -f "$out" ] && { echo "$out"; return; }
+
+    mkdir -p "$cache"
+    h=${res#*x}
+    command -v magick >/dev/null 2>&1 && im=magick || im=convert
+
+    if $im "$img" -resize "${res}^" -gravity center -extent "$res" \
+        -fill "$fill" -stroke none \
+        -draw "rectangle $bx,$((h-bb-bh)) $((bx+bw)),$((h-bb))" \
+        "png:$out.tmp" 2>/dev/null
+    then
+        mv "$out.tmp" "$out"
+        find "$cache" -name 'lock-*.png' ! -name "lock-$key.png" -delete
+        echo "$out"
+    else
+        rm -f "$out.tmp"
+        echo "$img"
+    fi
+}
+
+lock() {
+    i3lock -e -i "$(panel)" \
+        --ind-pos="x+310:y+h-80" \
+        --radius=25 --ring-width=5 \
+        --inside-color=00000000 --ring-color=4f94cdff \
+        --insidever-color=00000000 --ringver-color=73c936ff \
+        --insidewrong-color=00000000 --ringwrong-color=f43841ff \
+        --line-color=00000000 --separator-color=00000000 \
+        --keyhl-color=ffdd33ff --bshl-color=f43841ff \
+        --clock --force-clock \
+        --time-str="%H:%M" --time-pos="ix-265:iy-10" --time-align=1 \
+        --time-color=e4e4efff --time-font="Iosevka" --time-size=32 \
+        --date-str="%A, %d %B" --date-pos="ix-265:iy+12" --date-align=1 \
+        --date-color=96a6c8ff --date-font="Iosevka" --date-size=16 \
+        --verif-text="Verifying..." --verif-pos="ix+35:iy-34" --verif-align=2 \
+        --verif-color=e4e4efff --verif-font="Iosevka" --verif-size=12 \
+        --wrong-text="Failure!" --wrong-pos="ix+24:iy-34" --wrong-align=2 \
+        --wrong-color=f43841ff --wrong-font="Iosevka" --wrong-size=12 \
+        --noinput-text="" --lock-text="" --lockfailed-text="" \
+        --pass-media-keys --pass-volume-keys
+}
+
+confirm() {
+    [ "$(printf 'no\nyes\n' | dmenu -i -p "$1?")" = yes ]
+}
+
+choice=$(printf 'lock\nlogout\nsuspend\nreboot\nshutdown\n' | dmenu -i -p power)
+
+case $choice in
+    lock)     lock ;;
+    logout)   confirm logout && i3-msg exit ;;
+    suspend)  lock; loginctl suspend ;;
+    reboot)   confirm reboot && loginctl reboot ;;
+    shutdown) confirm shutdown && loginctl poweroff ;;
+esac

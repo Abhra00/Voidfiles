@@ -1,0 +1,122 @@
+# .config/i3status-rust/config.toml
+[theme]
+theme = "plain"
+[theme.overrides]
+separator = " | "
+separator_fg = "#453d41"
+separator_bg = "#181818"
+idle_bg = "#181818"
+idle_fg = "#e4e4ef"
+info_bg = "#181818"
+info_fg = "#96a6c8"
+good_bg = "#181818"
+good_fg = "#73c936"
+warning_bg = "#181818"
+warning_fg = "#ffdd33"
+critical_bg = "#181818"
+critical_fg = "#f43841"
+
+[icons]
+icons = "none"
+[icons.overrides]
+battery_charging = "CHR"
+battery_empty = "BAT"
+battery_quarter = "BAT"
+battery_half = "BAT"
+battery_three_quarters = "BAT"
+battery_full = "BAT"
+
+# order += "ipv6"
+[[block]]
+block = "custom"
+interval = 5
+command = '''
+a=$(ip -6 -o addr show scope global | awk 'NR==1{sub("/.*","",$4);print $4}')
+echo "Useless Protocol: ${a:-Down}"
+'''
+
+# order += "tea"
+[[block]]
+block = "custom"
+interval = 5
+json = true
+command = '''
+t=$(( $(cat /sys/class/thermal/thermal_zone0/temp) / 1000 ))
+s=Idle
+[ "$t" -ge 80 ] && s=Warning
+[ "$t" -ge 90 ] && s=Critical
+echo "{\"text\":\"Tea: $t °C\",\"state\":\"$s\"}"
+'''
+
+# order += "disk /"
+[[block]]
+block = "disk_space"
+path = "/"
+info_type = "available"
+interval = 5
+format = " Penger Folder: $available "
+
+# order += "wireless _first_"
+[[block]]
+block = "custom"
+interval = 5
+json = true
+command = '''
+for d in /sys/class/net/wl*; do
+  [ -e "$d" ] || continue
+  n=${d##*/}
+  if [ "$(cat "$d/operstate")" = up ]; then
+    ip=$(ip -4 -o addr show dev "$n" | awk '{sub("/.*","",$4);print $4;exit}')
+    q=$(awk -v n="$n:" '$1==n{printf "%d", $3*100/70}' /proc/net/wireless)
+    echo "{\"text\":\"W: (${q:-?}%) Leaked IP: ${ip:-none}\",\"state\":\"Good\"}"
+    exit
+  fi
+done
+echo "{\"text\":\"W: down\",\"state\":\"Critical\"}"
+'''
+
+# order += "ethernet _first_"
+[[block]]
+block = "custom"
+interval = 5
+json = true
+command = '''
+for d in /sys/class/net/e*; do
+  [ -e "$d" ] || continue
+  n=${d##*/}
+  if [ "$(cat "$d/operstate")" = up ]; then
+    ip=$(ip -4 -o addr show dev "$n" | awk '{sub("/.*","",$4);print $4;exit}')
+    sp=$(cat "$d/speed" 2>/dev/null)
+    echo "{\"text\":\"E: Leaked IP: ${ip:-none} (${sp:-?} Mbit/s)\",\"state\":\"Good\"}"
+    exit
+  fi
+done
+echo "{\"text\":\"E: down\",\"state\":\"Critical\"}"
+'''
+
+# order += "battery all"
+[[block]]
+block = "battery"
+interval = 5
+format = " Fairy Dust: $percentage{ $time_remaining.dur(hms:true, min_unit:m)|} "
+full_format = " Fairy Dust: $percentage FULL "
+not_charging_format = " Fairy Dust: $percentage IDLE "
+
+# order += "bluetooth"
+[[block]]
+block = "bluetooth"
+mac = "84:0F:2A:5D:98:67"
+format = " BT: $name{ $percentage|} "
+disconnected_format = " BT: DIS "
+
+# order += "load"
+[[block]]
+block = "load"
+interval = 5
+format = " Hot Loads: $1m.eng(w:4) "
+
+# order += "tztime local"
+[[block]]
+block = "time"
+interval = 1
+format = " $timestamp.datetime(f:'%Y-%m-%d %H:%M:%S') "

@@ -1,0 +1,33 @@
+#!/bin/sh
+# Use "Speaker Protect" on the speaker, the raw sink on headphones.
+
+raw=alsa_output.pci-0000_05_00.6.analog-stereo
+fx=speaker_protect
+last=
+
+active_port() {
+    pactl list sinks | awk -v n="$raw" '
+        $1 == "Name:" { cur = $2 }
+        cur == n && /Active Port:/ { print $3; exit }'
+}
+
+apply() {
+    port=$(active_port)
+    [ "$port" = "$last" ] && return
+    last=$port
+    case $port in
+        *headphone*) sink=$raw ;;
+        *) pactl list short sinks | grep -q "$fx" && sink=$fx || sink=$raw ;;
+    esac
+    pactl set-default-sink "$sink"
+}
+
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+    pactl list short sinks 2>/dev/null | grep -q "$raw" && break
+    sleep 1
+done
+
+apply
+pactl subscribe | while read -r _ ev _ obj _; do
+    [ "$ev $obj" = "'change' sink" ] && apply
+done

@@ -1,0 +1,35 @@
+#!/bin/sh
+# stow-manifest [-n] [package...]
+# Relink every package. No args = all packages.
+# Packages in system_pkgs go to /etc via sudo; everything else to $HOME.
+
+dir=$(cd "$(dirname "$0")" && pwd)
+target=${STOW_TARGET:-$HOME}
+system_pkgs="nftables"
+system_target=/etc
+flags=
+rc=0
+
+if [ "$1" = -n ]; then
+    flags=-n
+    shift
+fi
+
+command -v stow >/dev/null || { echo "stow not found" >&2; exit 1; }
+
+if [ $# -gt 0 ]; then
+    pkgs=$*
+else
+    pkgs=$(cd "$dir" && for d in */; do printf '%s ' "${d%/}"; done)
+fi
+
+for p in $pkgs; do
+    case " $system_pkgs " in
+        *" $p "*) s=sudo t=$system_target ;;
+        *) s= t=$target ;;
+    esac
+    # shellcheck disable=SC2086
+    $s stow $flags -d "$dir" -t "$t" -R "$p" || rc=1
+done
+
+exit $rc

@@ -1,0 +1,25 @@
+#!/bin/sh
+set -- $(ls /etc/sv)
+
+while :; do
+    clear
+    i=0
+    for s; do
+        i=$((i + 1))
+        [ -e "/var/service/$s" ] && m='*' || m=' '
+        printf '%3d [%s] %s\n' "$i" "$m" "$s"
+    done | pr -t -3 -w "$(tput cols)"
+    printf '\nnumber = toggle, enter = refresh, q = quit: '
+    read -r n || exit
+    case $n in
+        q) exit ;;
+        ''|*[!0-9]*) continue ;;
+    esac
+    [ "$n" -ge 1 ] && [ "$n" -le $# ] || continue
+    eval "s=\${$n}"
+    if [ -e "/var/service/$s" ]; then
+        sudo rm "/var/service/$s"
+    else
+        sudo ln -s "/etc/sv/$s" /var/service/
+    fi
+done

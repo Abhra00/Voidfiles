@@ -1,0 +1,70 @@
+#!/bin/sh
+
+icons=${OSD_ICONS:-$HOME/.local/share/osd-icons}
+ext=${OSD_EXT:-svg}
+step=5
+sink=@DEFAULT_AUDIO_SINK@
+source=@DEFAULT_AUDIO_SOURCE@
+
+notify() {
+    notify-send -a osd -h "string:x-dunst-stack-tag:$1" -h "int:value:$4" -i "$icons/$2.$ext" "$3"
+}
+
+level() {
+    wpctl get-volume "$1" | awk '{printf "%d", $2 * 100 + 0.5}'
+}
+
+is_muted() {
+    wpctl get-volume "$1" | grep -q MUTED
+}
+
+show_volume() {
+    if is_muted "$sink"; then
+        notify volume volume-muted "Muted" 0
+        return
+    fi
+    v=$(level "$sink")
+    if [ "$v" -ge 66 ]; then
+        icon=volume-high
+    elif [ "$v" -ge 33 ]; then
+        icon=volume-medium
+    else
+        icon=volume-low
+    fi
+    notify volume "$icon" "Volume $v%" "$v"
+}
+
+show_mic() {
+    if is_muted "$source"; then
+        notify mic mic-muted "Mic muted" 0
+    else
+        notify mic mic "Mic on" "$(level "$source")"
+    fi
+}
+
+show_brightness() {
+    br=$(xbacklight -get | awk '{printf "%d", $1 + 0.5}')
+    notify brightness brightness "Brightness $br%" "$br"
+}
+
+case $1 in
+    volume)
+        case $2 in
+            up) wpctl set-mute "$sink" 0; wpctl set-volume -l 1.0 "$sink" "$step%+" ;;
+            down) wpctl set-mute "$sink" 0; wpctl set-volume "$sink" "$step%-" ;;
+            mute) wpctl set-mute "$sink" toggle ;;
+        esac
+        show_volume
+        ;;
+    mic)
+        wpctl set-mute "$source" toggle
+        show_mic
+        ;;
+    brightness)
+        case $2 in
+            up) xbacklight -inc "$step" ;;
+            down) xbacklight -dec "$step" ;;
+        esac
+        show_brightness
+        ;;
+esac

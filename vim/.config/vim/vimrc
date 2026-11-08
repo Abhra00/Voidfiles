@@ -1,0 +1,99 @@
+" vimrc
+
+set nocompatible
+let mapleader=" "
+
+" no stray files
+set viminfo=
+set viminfofile=NONE
+set nobackup
+set nowritebackup
+set noswapfile
+set noundofile
+
+filetype plugin indent on
+syntax on
+
+" ui
+set number
+set relativenumber
+set cursorline
+set showcmd
+set noshowmode
+set laststatus=2
+set ruler
+set scrolloff=8
+set signcolumn=no
+set nowrap
+set termguicolors
+set background=dark
+
+" editing
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set autoindent
+set smartindent
+set backspace=indent,eol,start
+set hidden
+set autoread
+set mouse=a
+
+" clipboard
+if has('xterm_clipboard')
+    set clipboard=unnamedplus
+endif
+
+" search
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+
+" completion
+set wildmenu
+set wildmode=longest:full,full
+
+" performance
+set lazyredraw
+set ttyfast
+set updatetime=300
+set timeoutlen=500
+set ttimeoutlen=10
+
+" keys
+nnoremap <leader>h :nohlsearch<CR>
+nnoremap <leader>w :w<CR>
+nnoremap <leader>q :q<CR>
+nnoremap j gj
+nnoremap k gk
+nnoremap <C-n> :bnext<CR>
+nnoremap <C-p> :bprev<CR>
+
+" gruber darker
+hi Normal       guibg=#181818 guifg=#e4e4ef
+hi CursorLine   guibg=#282828 cterm=NONE
+hi LineNr       guifg=#52494e guibg=#181818
+hi CursorLineNr guifg=#ffdd33 guibg=#282828
+hi Visual       guibg=#453d41
+hi Search       guibg=#ffdd33 guifg=#181818
+hi IncSearch    guibg=#f43841 guifg=#181818
+hi Comment      guifg=#cc8c3c gui=NONE
+hi String       guifg=#73c936
+hi Constant     guifg=#e4e4ef
+hi Number       guifg=#e4e4ef
+hi Identifier   guifg=#e4e4ef gui=NONE
+hi Statement    guifg=#ffdd33 gui=bold
+hi Keyword      guifg=#ffdd33 gui=bold
+hi PreProc      guifg=#95a99f
+hi Type         guifg=#95a99f gui=NONE
+hi Special      guifg=#96a6c8
+hi MatchParen   guibg=#453d41 guifg=#ffdd33
+hi StatusLine   guibg=#453d41 guifg=#f4f4ff
+hi StatusLineNC guibg=#282828 guifg=#95a99f
+hi VertSplit    guibg=#181818 guifg=#453d41
+hi Pmenu        guibg=#282828 guifg=#e4e4ef
+hi PmenuSel     guibg=#96a6c8 guifg=#181818
+hi ErrorMsg     guibg=#f43841 guifg=#f4f4ff
+hi WarningMsg   guifg=#ffdd33

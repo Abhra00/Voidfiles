@@ -1,0 +1,32 @@
+#!/bin/sh
+
+dir=${SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}
+icons=${OSD_ICONS:-$HOME/.local/share/osd-icons}
+
+choice=$(printf 'Area\nFull screen\nActive window\n' | dmenu -p 'Screenshot:')
+[ -z "$choice" ] && exit 0
+save=$(printf 'Copy only\nCopy and save\n' | dmenu -p 'Save?')
+[ -z "$save" ] && exit 0
+
+sleep 0.2
+
+tmp=$(mktemp --suffix=.png)
+trap 'rm -f "$tmp"' EXIT
+
+case "$choice" in
+    "Area")          maim -s -u "$tmp" ;;
+    "Full screen")   maim -u "$tmp" ;;
+    "Active window") maim -u -i "$(xdotool getactivewindow)" "$tmp" ;;
+esac
+[ -s "$tmp" ] || exit 0
+
+xclip -selection clipboard -t image/png -i "$tmp"
+
+if [ "$save" = "Copy and save" ]; then
+    mkdir -p "$dir"
+    file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
+    mv "$tmp" "$file"
+    notify-send -a screenshot -i "$file" "Screenshot copied" "Saved to ${file#"$HOME"/}"
+else
+    notify-send -a screenshot -i "$icons/screenshot.svg" "Screenshot copied"
+fi

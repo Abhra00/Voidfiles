@@ -1,0 +1,64 @@
+#!/bin/sh
+# nsxiv key-handler: press Ctrl+x, then a key below.
+
+# Destinations for copy/move (one per line, $HOME is expanded)
+dirs() {
+	cat <<EOF
+$HOME/Pictures
+$HOME/Pictures/wallpapers
+$HOME/Pictures/screenshots
+$HOME/Downloads
+$HOME/Documents
+EOF
+}
+
+pick_dir() {
+	dirs | dmenu -l 20 -i -p "$1"
+}
+
+check_dir() {
+	if [ -z "$destdir" ] || [ ! -d "$destdir" ]; then
+		notify-send "nsxiv" "Not a directory, cancelled."
+		exit 1
+	fi
+}
+
+while IFS= read -r file
+do
+	case "$1" in
+		"w" )
+			xwallpaper --zoom "$file" & ;;
+		"c" )
+			[ -z "$destdir" ] && destdir="$(pick_dir "Copy file(s) to where?")"
+			check_dir
+			cp -- "$file" "$destdir" &&
+			notify-send -i "$(readlink -f "$file")" "Copied" "$file -> $destdir" & ;;
+		"m" )
+			[ -z "$destdir" ] && destdir="$(pick_dir "Move file(s) to where?")"
+			check_dir
+			mv -- "$file" "$destdir" &&
+			notify-send -i "$(readlink -f "$destdir/${file##*/}")" "Moved" "$file -> $destdir" & ;;
+		"r" )
+			magick "$file" -rotate 90 "$file" ;;
+		"R" )
+			magick "$file" -rotate -90 "$file" ;;
+		"f" )
+			magick "$file" -flop "$file" ;;
+		"y" )
+			printf %s "${file##*/}" | xclip -selection clipboard &&
+			notify-send "Copied filename" "${file##*/}" & ;;
+		"Y" )
+			readlink -f "$file" | tr -d '\n' | xclip -selection clipboard &&
+			notify-send "Copied path" "$(readlink -f "$file")" & ;;
+		"x" )
+			magick "$file" png:- | xclip -selection clipboard -t image/png &&
+			notify-send "Image copied to clipboard" & ;;
+		"d" )
+			[ "$(printf 'No\nYes' | dmenu -i -p "Really delete $file?")" = "Yes" ] &&
+			rm -- "$file" && notify-send "Deleted" "$file" ;;
+		"g" )
+			command -v gimp >/dev/null && setsid -f gimp "$file" ;;
+		"i" )
+			notify-send "File information" "$(magick identify "$file")" ;;
+	esac
+done

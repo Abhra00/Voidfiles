@@ -1,0 +1,27 @@
+#!/bin/sh
+
+src=$HOME/Voidfiles/Wallpapers/.local/share/Wallpaper.jpg
+out=$HOME/Voidfiles/Wallpapers/.local/share/Lockpaper.png
+stamp=$HOME/.cache/lockscreen.key
+
+s=10     # blur: lower is blurrier
+dim=20   # dim percent
+
+res=$(xrandr --current | sed -n 's/.*current \([0-9]*\) x \([0-9]*\),.*/\1x\2/p')
+[ -n "$res" ] || exit 1
+w=${res%x*} h=${res#*x}
+sm="$((w*s/100))x$((h*s/100))"
+
+# skip when nothing is changed
+key=$(printf '%s' "$res $s $dim $(cksum < "$src")" | cksum)
+[ -f "$out" ] && [ "$(cat "$stamp" 2>/dev/null)" = "$key" ] && exit 0
+
+command -v magick >/dev/null 2>&1 && im=magick || im=convert
+
+$im "$src" -colorspace RGB \
+    -filter Gaussian -resize "${sm}^" -gravity center -extent "$sm" \
+    -define filter:sigma=0.6 -resize "${res}!" \
+    -colorspace sRGB -fill black -colorize "$dim%" \
+    "png:$out.tmp" \
+    && mv "$out.tmp" "$out" \
+    && { mkdir -p "${stamp%/*}"; echo "$key" > "$stamp"; }

@@ -1,0 +1,12 @@
+# Use Xresources colors/settings on startup
+xrdb ${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources & xrdbpid=$!
+
+# Ensure that xrdb has finished running before moving on to start the WM/DE
+[ -n "$xrdbpid" ] && wait "$xrdbpid"
+
+# Keyboard repeat (delay ms, rate Hz) and brightness
+xset r rate 250 40
+xbacklight -set 100
+
+# Launch i3
+exec dbus-run-session ssh-agent i3

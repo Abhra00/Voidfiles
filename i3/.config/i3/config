@@ -81,6 +81,10 @@ bindsym $mod+slash exec --no-startup-id playerctl play-pause
 bindsym $mod+comma exec --no-startup-id playerctl previous
 bindsym $mod+period exec --no-startup-id playerctl next
 
+# Custom demnu menus
+bindsym $mod+Ctrl+e exec --no-startup-id $scripts_dir/dmoji
+bindsym $mod+Ctrl+b exec --no-startup-id $scripts_dir/batmenu
+
 # focus
 bindsym $mod+f focus right
 bindsym $mod+b focus left

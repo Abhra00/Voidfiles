@@ -70,6 +70,9 @@ export FZF_DEFAULT_OPTS="
   --bind=ctrl-/:toggle-preview,ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up
 "
 
+# Akapass
+export SUDO_ASKPASS="$HOME/.local/bin/dmenupass"
+
 # Toolkit / app settings
 export QT_QPA_PLATFORMTHEME="gtk3" # Qt uses the GTK theme
 export MOZ_USE_XINPUT2=1           # Firefox smooth scrolling/touchpads

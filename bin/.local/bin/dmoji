@@ -1,0 +1,21 @@
+#!/bin/sh
+
+DB=${DMOJI_DB:-${XDG_DATA_HOME:-$HOME/.local/share}/emoji.json}
+
+[ -r "$DB" ] || { echo "dmoji: cannot read $DB" >&2; exit 1; }
+
+sel=$(jq -r '
+	if type == "object" then
+		to_entries[] | "\(.key) \([.value | .. | strings] | join(" "))"
+	else
+		.[] | [.. | strings] | join(" ")
+	end
+' "$DB" | dmenu -i -l 15 -p emoji) || exit 1
+emoji=${sel%% *}
+
+printf '%s' "$emoji" | xclip -selection clipboard
+
+sleep 0.1
+xdotool type --clearmodifiers -- "$emoji"
+
+notify-send -a dmoji -t 1500 -h boolean:transient:true "$emoji" "copied"

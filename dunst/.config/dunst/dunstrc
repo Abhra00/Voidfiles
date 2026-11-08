@@ -49,3 +49,7 @@
     appname = screenshot
     min_icon_size = 96
     max_icon_size = 96
+
+[dmoji]
+appname = dmoji
+history_ignore = yes

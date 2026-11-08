@@ -1,0 +1,87 @@
+#!/bin/sh
+# batmenu: battery manager for dmenu
+
+BAT=${BAT:-/sys/class/power_supply/BAT1}
+MENU=${MENU:-dmenu}
+ELEVATE=${ELEVATE:-sudo -A}
+
+# codepoint -> utf-8 (BMP, 3 byte range)
+glyph() {
+	printf "\\$(printf '%03o' $((0xE0 | ($1 >> 12))))\\$(printf '%03o' $((0x80 | (($1 >> 6) & 63))))\\$(printf '%03o' $((0x80 | ($1 & 63))))"
+}
+
+I_TYPE=$(glyph 0xf021)
+I_START=$(glyph 0xf04b)
+I_STOP=$(glyph 0xf04d)
+I_STATUS=$(glyph 0xf240)
+I_HEALTH=$(glyph 0xf21e)
+I_CYCLES=$(glyph 0xf01e)
+I_VENDOR=$(glyph 0xf275)
+I_TECH=$(glyph 0xf0c3)
+I_TYPES=$(glyph 0xf013)
+I_POWER=$(glyph 0xf0e7)
+I_VOLT=$(glyph 0xf1e6)
+
+rd() { [ -r "$BAT/$1" ] && cat "$BAT/$1"; }
+
+# some firmware reports strings as "0x43 0x65 ..."
+decode() {
+	case $1 in
+	0x*)
+		for b in $1; do
+			[ $((b)) -ne 0 ] && printf "\\$(printf '%03o' "$b")"
+		done
+		;;
+	*) printf '%s' "$1" ;;
+	esac
+}
+
+set_val() { printf '%s\n' "$2" | $ELEVATE tee "$BAT/$1" >/dev/null; }
+
+row() { printf '%s  %-9s %s\n' "$1" "$2" "$3"; }
+
+actions() {
+	# active type is bracketed, skip it
+	for t in $(rd charge_types | tr ' ' '\n' | grep -v '^\['); do
+		echo "$I_TYPE  Change charge type to : $t"
+	done
+	[ -e "$BAT/charge_control_start_threshold" ] &&
+		echo "$I_START  Change start threshold : $(rd charge_control_start_threshold)%"
+	[ -e "$BAT/charge_control_end_threshold" ] &&
+		echo "$I_STOP  Change stop threshold : $(rd charge_control_end_threshold)%"
+}
+
+info() {
+	full=$(rd energy_full || rd charge_full)
+	design=$(rd energy_full_design || rd charge_full_design)
+	health=$(awk -v f="$full" -v d="$design" \
+		'BEGIN { if (d > 0) printf "%.1f%%", f / d * 100; else print "?" }')
+
+	row "$I_STATUS" Status "$(rd status) ($(rd capacity)%)"
+	row "$I_HEALTH" Health "$health"
+	row "$I_CYCLES" Cycles "$(rd cycle_count)"
+	row "$I_VENDOR" Vendor "$(decode "$(rd manufacturer)") $(decode "$(rd model_name)")"
+	row "$I_TECH" Tech "$(rd technology)"
+	row "$I_TYPES" Types "$(rd charge_types)"
+
+	p=$(rd power_now)
+	[ -n "$p" ] && row "$I_POWER" Power "$(awk -v p="$p" 'BEGIN { printf "%.1f W", p / 1e6 }')"
+	v=$(rd voltage_now)
+	[ -n "$v" ] && row "$I_VOLT" Voltage "$(awk -v v="$v" 'BEGIN { printf "%.2f V", v / 1e6 }')"
+}
+
+ask() { : | $MENU -p "$1"; }
+
+while sel=$({ actions; echo "────────────────────"; info; } | $MENU -l 16 -p battery); do
+	case $sel in
+	*"Change charge type to : "*)
+		set_val charge_types "${sel##*: }"
+		;;
+	*"Change start threshold"*)
+		v=$(ask "start at (%):") && [ -n "$v" ] && set_val charge_control_start_threshold "$v"
+		;;
+	*"Change stop threshold"*)
+		v=$(ask "stop at (%):") && [ -n "$v" ] && set_val charge_control_end_threshold "$v"
+		;;
+	esac
+done

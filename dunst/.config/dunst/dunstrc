@@ -51,5 +51,5 @@
     max_icon_size = 96
 
 [dmoji]
-appname = dmoji
-history_ignore = yes
+    appname = dmoji
+    history_ignore = yes

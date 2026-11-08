@@ -3,12 +3,38 @@
 dir=${SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}
 icons=${OSD_ICONS:-$HOME/.local/share/osd-icons}
 
-choice=$(printf 'Area\nFull screen\nActive window\n' | dmenu -p 'Screenshot:')
-[ -z "$choice" ] && exit 0
-save=$(printf 'Copy only\nCopy and save\n' | dmenu -p 'Save?')
-[ -z "$save" ] && exit 0
+fail() {
+    notify-send -a screenshot -i "$icons/screenshot.svg" "⛔ Screenshot not taken"
+    exit 0
+}
 
-sleep 0.2
+choice=$(printf 'Area\nFull screen\nActive window\nTimed\n' | dmenu -p 'Screenshot:')
+[ -z "$choice" ] && fail
+
+delay=0
+if [ "$choice" = "Timed" ]; then
+    delay=$(printf '' | dmenu -p 'Seconds:')
+    case "$delay" in
+        ''|*[!0-9]*) fail ;;
+    esac
+    [ "$delay" -gt 0 ] || fail
+    choice=$(printf 'Area\nFull screen\nActive window\n' | dmenu -p 'Timed mode:')
+    [ -z "$choice" ] && fail
+fi
+
+save=$(printf 'Copy only\nCopy and save\n' | dmenu -p 'Save?')
+[ -z "$save" ] && fail
+
+n=$delay
+while [ "$n" -gt 0 ]; do
+    notify-send -a screenshot -t 1000 -i "$icons/screenshot.svg" \
+        -h string:x-canonical-private-synchronous:screenshot-timer \
+        "Taking shot in $n"
+    sleep 1
+    n=$((n - 1))
+done
+
+sleep 0.3
 
 tmp=$(mktemp --suffix=.png)
 trap 'rm -f "$tmp"' EXIT
@@ -18,7 +44,7 @@ case "$choice" in
     "Full screen")   maim -u "$tmp" ;;
     "Active window") maim -u -i "$(xdotool getactivewindow)" "$tmp" ;;
 esac
-[ -s "$tmp" ] || exit 0
+[ -s "$tmp" ] || fail
 
 xclip -selection clipboard -t image/png -i "$tmp"
 
